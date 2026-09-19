@@ -38,11 +38,20 @@ Exclusions : ...
 - <intitulé exact 1>
 ## 2. <Famille métier 2>
 ...
-### Mots-clés portails :
-`<mot-clé 1>`, `<mot-clé 2>`, ...
+### Intitulés portails (recherche EURES/JobSpy) :
+`<intitulé 1>`, `<intitulé 2>`, ...
+### Compétences (jamais cherchées) :
+`<stack/outil 1>`, `<stack/outil 2>`, ...
 ```
 
-Règles : intitulés courts et cherchables (pas de phrases). Chaque famille = 5-10 intitulés. Les mots-clés portails reprennent les intitulés les plus discriminants.
+Règles : intitulés courts et cherchables (pas de phrases). Chaque famille = 5-10 intitulés.
+Les Intitulés portails sont les SEULS termes envoyés en recherche (EURES + JobSpy) : 5-8 max,
+que des intitulés de poste précis et discriminants, cherchables tels quels
+(ex : `Lead Developer Fullstack`, `Développeur Backend Python`).
+INTERDIT en recherche : termes de stack/outils seuls (`React`, `Ruby on Rails`, `Python`, `Heroku`...) —
+sauf inclus dans un intitulé complet. Un terme large = bruit + lenteur (ex : `React` seul
+ramène des milliers d'offres hors sujet sur EURES et JobSpy).
+Les Compétences listent la stack/outils pour la sélection et le scoring uniquement, jamais pour la recherche.
 
 ## 3. Amorcer `profil/companies.yaml` (sans écraser l'existant)
 

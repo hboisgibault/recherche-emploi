@@ -26,6 +26,11 @@ Variantes :
 - Debug ciblé : `python3 scripts/fetch_direct.py --only "Palais,le19M" --limit 5`
 - Rattrapage week-end : `--days 3` (eures) / `--hours 72` (jobspy)
 - France seule : `fetch_jobspy.py --hours 24 --fr-only`
+- Bruit/lenteur EURES ou JobSpy : vérifier que la section `Intitulés portails` du guide
+  ne contient que des intitulés de poste précis (jamais de stack seule type `React`,
+  `Ruby on Rails`, `Python`). En debug, forcer des intitulés resserrés :
+  `fetch_eures.py --countries fr --keywords "Lead Developer Fullstack"`
+  / `fetch_jobspy.py --keywords "Lead Developer Fullstack" --max-terms 4 --results 10 --sites indeed`.
 
 ## 2. Sorties attendues
 

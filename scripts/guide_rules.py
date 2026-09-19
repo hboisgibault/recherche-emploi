@@ -115,9 +115,18 @@ def parse_exclusions(line: str) -> list[str]:
 
 
 def parse_keywords(text: str) -> list[str]:
-    """Mots-clés de recherche : section `Mots-clés` + puces des familles métier."""
+    """Intitulés de recherche : section `Intitulés portails` (puis repli `Mots-clés`,
+    puis puces des familles métier). La section `Compétences` n'est jamais cherchée."""
     kws: list[str] = []
-    m = re.search(r"(?im)^.*mots-cl[ée]s.*$\n(?P<body>(?:.*\n?)*)", text)
+    # Priorité : nouvelle section `Intitulés portails`, sinon ancien `Mots-clés` (rétrocompat).
+    # Le corps s'arrête à la prochaine section (#) pour ne pas aspirer `Compétences`.
+    m = re.search(
+        r"(?im)^.*intitul[ée]s\s+portails.*$\n(?P<body>(?:(?!^#{1,6}\s).*(\n|$))*)",
+        text,
+    ) or re.search(
+        r"(?im)^.*mots-cl[ée]s.*$\n(?P<body>(?:(?!^#{1,6}\s).*(\n|$))*)",
+        text,
+    )
     if m:
         body = m.group("body")
         for tok in re.split(r"[,`\n]", body):

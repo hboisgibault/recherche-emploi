@@ -31,6 +31,9 @@ Noter les sources KO et continuer avec les disponibles. Ne pas relancer en boucl
 - Pressé : `fetch_direct.py` seul + sélection (rapide, < 1 min).
 - Rattrapage : `--days 3` / `--hours 72` + `--fr-only` si le volume Europe est trop gros.
 - Debug : appeler `/job-collect` ou `/job-select` seuls au lieu de tout relancer.
+- Bruit/lenteur EURES ou JobSpy : la section `Intitulés portails` du guide doit contenir
+  uniquement des intitulés de poste précis (jamais de stack seule type `React`). Sinon,
+  renvoyer vers `/profil-builder` pour corriger le guide plutôt que relancer en boucle.
 
 ## 3. Règles
 

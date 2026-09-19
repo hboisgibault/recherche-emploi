@@ -38,7 +38,8 @@ Compter les rejetés par règle pour le rapport final (`Rejetées : N (contrat r
 
 ## 4. Score 0-10 (expliquable, pas de LLM)
 
-- +3 : un intitulé ou mot-clé du guide dans le titre.
+- +3 : un intitulé de la section `Intitulés portails` du guide dans le titre (les termes
+  de la section `Compétences` seuls, ex `React`, ne comptent pas).
 - +2 : entreprise `priorite: haute` dans `profil/companies.yaml`, ou source `direct`.
 - +2 : lieu compatible avec la ligne `Zone:` du guide (parsée à chaque run, ex : villes/pays cités ; placeholder `[...]` = pas de bonus, pas de malus).
 - +1 : contrat = premier type accepté de la ligne `Contrat:` du guide (ex : si `CDI ou CDD`, bonus pour CDI).
