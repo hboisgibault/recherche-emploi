@@ -6,6 +6,18 @@ un seul briefing à lire.
 
 Tout passe par l'agent et ses skills — aucune commande à retenir.
 
+## Installation
+
+Python 3.10+ requis, puis :
+
+```bash
+pip install -r requirements.txt
+```
+
+Cela installe `requests`, `beautifulsoup4` et `pyyaml` (collecte sites directs),
+plus `pandas` et `python-jobspy` (collecte Indeed/LinkedIn/Google).
+Sans ces dépendances, l'agent vous dira ce qui manque et comment l'installer.
+
 ## Démarrage (première fois)
 
 Demandez à l'agent : **« crée mon profil »** (skill `/profil-builder`).
