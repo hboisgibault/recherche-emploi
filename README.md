@@ -20,8 +20,10 @@ Sans ces dépendances, l'agent vous dira ce qui manque et comment l'installer.
 
 ## Démarrage (première fois)
 
-Demandez à l'agent : **« crée mon profil »** (skill `/profil-builder`).
-Il vous pose 6 questions max et remplit `profil/` :
+1. **Déposez d'abord votre CV** dans `profil/` : `profil/cv.pdf` ou `profil/cv.md`.
+   Sans lui, l'agent ne connaît ni vos compétences ni votre parcours.
+2. Demandez ensuite à l'agent : **« crée mon profil »** (skill `/profil-builder`).
+   Il lit votre CV, vous pose 6 questions max et remplit `profil/` :
 - `profil/guide_recherche.md` — métiers, zone, contrats, exclusions, mots-clés.
   Tout le filtrage et la recherche en découlent, sans toucher au code.
 - `profil/companies.yaml` — entreprises à surveiller en direct.
