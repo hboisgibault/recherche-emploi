@@ -1,0 +1,12 @@
+# Sorties générées (runs quotidiens)
+offres/*
+!offres/.gitkeep
+
+# État runtime (recréé automatiquement par fetch_direct.py)
+state_direct.json
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/

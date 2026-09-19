@@ -1,0 +1,18 @@
+# Cibles directes — sites d'entreprises à surveiller (hors portails généralistes).
+# Fait partie des entrées utilisateur (dossier profil/).
+# Ajoutez une entrée par site, ou laissez ce fichier vide (liste `[]`).
+#
+# type: page_recruit | sans_page | ats_externe | job_board_niche
+# statut: verifie | a_verifier (à confirmer au 1er run)
+# Usage : scripts/fetch_direct.py — 1 entrée = 1 fetch quotidien + hash diff.
+#
+# Exemple :
+# - nom: Exemple Atelier
+#   secteur: exemple
+#   lieu: Nantes
+#   type: page_recruit
+#   statut: a_verifier
+#   url: https://exemple.fr/recrutement/
+#   notes: "À vérifier au 1er run."
+#   priorite: haute
+[]
