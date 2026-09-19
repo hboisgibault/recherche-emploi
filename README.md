@@ -8,11 +8,18 @@ Tout passe par l'agent et ses skills — aucune commande à retenir.
 
 ## Installation
 
-Python 3.10+ requis, puis :
-
-```bash
-pip install -r requirements.txt
-```
+1. **Clonez le dépôt**, puis placez-vous dedans :
+   ```bash
+   git clone https://github.com/hboisgibault/recherche-emploi.git
+   cd recherche-emploi
+   ```
+2. **Lancez votre agent (OpenCode, Claude Code...) depuis ce dossier** —
+   c'est important : les skills, les scripts et le profil sont lus
+   en chemins relatifs (`profil/`, `scripts/`, `offres/`).
+3. Installez les dépendances (Python 3.10+ requis) :
+   ```bash
+   pip install -r requirements.txt
+   ```
 
 Cela installe `requests`, `beautifulsoup4` et `pyyaml` (collecte sites directs),
 plus `pandas` et `python-jobspy` (collecte Indeed/LinkedIn/Google).
