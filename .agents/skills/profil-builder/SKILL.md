@@ -16,7 +16,11 @@ Une seule exécution par utilisateur. Le profil change rarement, le run du matin
 
 1. CV : lire `profil/cv.pdf` ou `profil/cv.md` (voir `profil/README.md`). Si absent, demander de le déposer.
 2. Métiers visés (liste libre, ex : soudeur, comptable, designer objet).
-3. Zones acceptées (ex : Paris + grandes villes FR, Europe Ouest).
+3. Zones acceptées (ex : Paris, Île-de-France + remote). Cette ligne pilote le périmètre
+   de recherche : pays EURES + lieu JobSpy. La formuler en lieux séparés par virgules
+   (`Paris, Lyon + remote`) ; ajouter `remote` si accepté. Pas de filtre dur sur le lieu
+   en sortie (formats sources trop hétérogènes) — la Zone cadre les requêtes, et le
+   bonus lieu du scoring (`job-select`) fait le reste.
 4. Contrats acceptés (ex : CDI/CDD uniquement, pas de stage).
 5. Exclusions (ex : peinture, plomberie, téléprospection).
 6. Optionnel : 5-10 entreprises cibles connues.

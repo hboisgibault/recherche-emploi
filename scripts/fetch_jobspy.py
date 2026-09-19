@@ -29,10 +29,10 @@ except ImportError:
 import pandas as pd
 
 try:
-    from guide_rules import is_excluded as guide_is_excluded, load_guide
+    from guide_rules import is_excluded as guide_is_excluded, jobspy_place_for_zones, load_guide
 except ImportError:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
-    from guide_rules import is_excluded as guide_is_excluded, load_guide
+    from guide_rules import is_excluded as guide_is_excluded, jobspy_place_for_zones, load_guide
 
 # Termes de recherche : lus depuis le guide (voir main). Pas de liste en dur ici.
 
@@ -96,8 +96,8 @@ def main() -> int:
     ap.add_argument("--sites", nargs="+", default=["indeed", "linkedin", "google"],
                     help="sites JobSpy (défaut: indeed linkedin google)")
     ap.add_argument("--fr-only", action="store_true", help="sans effet conservé pour compatibilité")
-    ap.add_argument("--location", default="Paris, France", help="lieu des requêtes dérivées du guide")
-    ap.add_argument("--country", default="France", help="pays Indeed des requêtes dérivées du guide")
+    ap.add_argument("--location", default=None, help="lieu des requêtes (défaut: dérivé de la Zone du guide)")
+    ap.add_argument("--country", default=None, help="pays Indeed des requêtes (défaut: dérivé de la Zone du guide)")
     ap.add_argument("--max-terms", type=int, default=12, help="nb max de termes du guide utilisés (défaut: 12)")
     ap.add_argument("--guide", default=None, help="chemin du guide_recherche.md (défaut: profil/guide_recherche.md)")
     ap.add_argument("--keywords", nargs="*", default=None, help="termes de recherche (défaut: ceux du guide)")
@@ -111,12 +111,17 @@ def main() -> int:
 
     rules = load_guide(args.guide)
     print(f"# {rules.describe()}")
+    guide_location, guide_country = jobspy_place_for_zones(rules.zones)
+    location = args.location or guide_location
+    country = args.country or guide_country
+    if args.location is None or args.country is None:
+        print(f"# lieu JobSpy : {location} / {country} (Zone du guide)")
     terms = args.keywords or rules.keywords
     if not terms:
         print("ERREUR : aucun terme de recherche.", file=sys.stderr)
         print("Renseignez les intitulés dans profil/guide_recherche.md ou passez --keywords.", file=sys.stderr)
         return 2
-    searches = [(t, args.location, args.country) for t in terms[: args.max_terms]]
+    searches = [(t, location, country) for t in terms[: args.max_terms]]
 
     print(f"{len(searches)} requêtes x {args.sites} (dernières {args.hours}h)...")
     df = run_searches(searches, args.sites, args.results, args.hours, args.verbose,

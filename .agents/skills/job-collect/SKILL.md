@@ -22,6 +22,10 @@ python3 scripts/fetch_jobspy.py --hours 24
 
 Attendre la fin de chaque script. En cas d'échec d'un script, noter l'erreur et continuer avec les sorties disponibles.
 
+Périmètre géo : les pays EURES et le lieu JobSpy sont dérivés de la ligne `Zone:` du guide
+(repli : Europe de l'Ouest / Paris si ligne absente). Forçage ponctuel possible :
+`--countries fr be` (eures), `--location "Lyon, France" --country France` (jobspy).
+
 Variantes :
 - Debug ciblé : `python3 scripts/fetch_direct.py --only "Palais,le19M" --limit 5`
 - Rattrapage week-end : `--days 3` (eures) / `--hours 72` (jobspy)

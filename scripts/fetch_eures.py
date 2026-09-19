@@ -33,10 +33,10 @@ except ImportError:
     sys.exit(1)
 
 try:
-    from guide_rules import is_excluded as guide_is_excluded, load_guide
+    from guide_rules import countries_for_zones, is_excluded as guide_is_excluded, load_guide
 except ImportError:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
-    from guide_rules import is_excluded as guide_is_excluded, load_guide
+    from guide_rules import countries_for_zones, is_excluded as guide_is_excluded, load_guide
 
 API_URL = "https://europa.eu/eures/api/jv-searchengine/public/jv-search/search"
 
@@ -143,7 +143,8 @@ def main() -> int:
     ap = argparse.ArgumentParser(description="Offres du jour via EURES")
     ap.add_argument("--days", type=int, default=1, help="fenêtre : 1, 3 ou 7 jours (défaut: 1)")
     ap.add_argument("--pages", type=int, default=1, help="pages de 50 résultats par mot-clé (défaut: 1)")
-    ap.add_argument("--countries", nargs="+", default=DEFAULT_COUNTRIES)
+    ap.add_argument("--countries", nargs="+", default=None,
+                    help="pays EURES (défaut: dérivé de la Zone du guide, sinon Europe de l'Ouest)")
     ap.add_argument("--lang", default="fr", help="langue de réponse (défaut: fr)")
     ap.add_argument("--guide", default=None, help="chemin du guide_recherche.md (défaut: profil/guide_recherche.md)")
     ap.add_argument("--keywords", nargs="*", default=None, help="mots-clés (défaut: ceux du guide, sinon repli)")
@@ -161,7 +162,12 @@ def main() -> int:
     session = requests.Session()
     session.headers.update({"Content-Type": "application/json", "User-Agent": "recherche-emploi/1.0"})
     session_id = f"recherche-{uuid.uuid4().hex[:8]}"
-    countries = [c.lower() for c in args.countries]
+    if args.countries is not None:
+        countries = [c.lower() for c in args.countries]
+    else:
+        countries = countries_for_zones(rules.zones) or list(DEFAULT_COUNTRIES)
+        print(f"# pays EURES : {','.join(countries)}"
+              f" ({'Zone du guide' if countries_for_zones(rules.zones) else 'défaut Europe de l’Ouest'})")
 
     all_offers: dict = {}
     # NB : les keywords EURES se combinent en ET -> une requête par mot-clé, puis fusion.

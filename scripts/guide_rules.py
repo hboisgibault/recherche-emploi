@@ -38,6 +38,34 @@ REFUSE_CLAUSE_RE = re.compile(
     r"(?:pas\s+de|hors|sauf|except[eé]|ni|no)\s+([^.,;()]+)", re.IGNORECASE
 )
 
+# Mots signalant une ouverture au remote dans la ligne `Zone:` (informatif :
+# aucun filtre dur n'est appliqué sur le lieu, formats sources trop hétérogènes).
+REMOTE_RE = re.compile(r"remote|t[eé]l[eé]travail|distanciel|\bwfh\b", re.IGNORECASE)
+
+# Mapping zone libre -> code pays EURES / nom pays JobSpy (match insensible accents).
+# Toute zone non reconnue est ignorée (pas de devinette) : repli sur les défauts.
+ZONE_COUNTRY_MAP = {
+    "france": "fr", "fr": "fr", "paris": "fr", "idf": "fr",
+    "ile-de-france": "fr", "ile de france": "fr", "lyon": "fr", "marseille": "fr",
+    "toulouse": "fr", "bordeaux": "fr", "nantes": "fr", "lille": "fr",
+    "strasbourg": "fr", "nice": "fr", "montpellier": "fr", "rennes": "fr",
+    "belgique": "be", "belgium": "be", "be": "be", "bruxelles": "be", "brussels": "be",
+    "pays-bas": "nl", "netherlands": "nl", "nl": "nl", "amsterdam": "nl",
+    "luxembourg": "lu", "lu": "lu",
+    "allemagne": "de", "germany": "de", "de": "de", "berlin": "de", "munich": "de",
+    "autriche": "at", "austria": "at", "at": "at", "vienne": "at", "vienna": "at",
+    "suisse": "ch", "switzerland": "ch", "ch": "ch", "zurich": "ch", "geneve": "ch",
+    "italie": "it", "italy": "it", "it": "it", "milan": "it", "rome": "it",
+    "espagne": "es", "spain": "es", "es": "es", "madrid": "es", "barcelone": "es",
+    "portugal": "pt", "pt": "pt", "lisbonne": "pt", "lisbon": "pt",
+    "irlande": "ie", "ireland": "ie", "ie": "ie", "dublin": "ie",
+}
+COUNTRY_NAMES = {
+    "fr": "France", "be": "Belgique", "nl": "Pays-Bas", "lu": "Luxembourg",
+    "de": "Allemagne", "at": "Autriche", "ch": "Suisse", "it": "Italie",
+    "es": "Espagne", "pt": "Portugal", "ie": "Irlande",
+}
+
 
 def norm(s: str) -> str:
     """Minuscules + accents supprimés pour un matching insensible aux accents."""
@@ -150,6 +178,53 @@ def parse_keywords(text: str) -> list[str]:
     return out[:20]
 
 
+def parse_zone(line: str) -> tuple[list[str], bool]:
+    """Découpe la ligne `Zone:` en (zones, remote). Placeholder -> ([], False).
+
+    Séparateurs : virgules, points-virgules, `/`, `+`, `|` et ` et `. Les mots
+    remote/télétravail/distanciel/wfh arment le flag `remote` et sont retirés
+    des zones (ce ne sont pas des lieux cherchables).
+    """
+    if _is_placeholder(line):
+        return [], False
+    remote = bool(REMOTE_RE.search(line))
+    # Retire les mentions remote avant découpage pour ne pas les chercher comme lieux.
+    cleaned = REMOTE_RE.sub(" ", line)
+    tokens: list[str] = []
+    for chunk in re.split(r"[;,/|+]", cleaned):
+        for tok in re.split(r"\s+et\s+", chunk, flags=re.IGNORECASE):
+            tok = PLACEHOLDER_RE.sub("", tok).strip(" .-")
+            if len(tok) > 1:
+                tokens.append(tok)
+    # Déduplique en gardant l'ordre (insensible à la casse).
+    seen, out = set(), []
+    for t in tokens:
+        tl = norm(t)
+        if tl not in seen:
+            seen.add(tl)
+            out.append(t)
+    return out, remote
+
+
+def countries_for_zones(zones: list[str]) -> list[str]:
+    """Mappe les zones libres vers des codes pays EURES. Zones inconnues ignorées."""
+    codes: list[str] = []
+    for z in zones:
+        code = ZONE_COUNTRY_MAP.get(norm(z))
+        if code and code not in codes:
+            codes.append(code)
+    return codes
+
+
+def jobspy_place_for_zones(zones: list[str]) -> tuple[str, str]:
+    """Dérive (location, country) JobSpy depuis les zones. Défaut : Paris, France."""
+    codes = countries_for_zones(zones)
+    if not zones or not codes:
+        return "Paris, France", "France"
+    country = COUNTRY_NAMES.get(codes[0], "France")
+    return f"{zones[0]}, {country}", country
+
+
 @dataclass
 class GuideRules:
     """Règles compilées depuis le guide. `configured=False` = aucun filtre."""
@@ -160,6 +235,8 @@ class GuideRules:
     refused: list[str] = field(default_factory=list)
     exclusions: list[str] = field(default_factory=list)
     keywords: list[str] = field(default_factory=list)
+    zones: list[str] = field(default_factory=list)
+    remote: bool = False
 
     def describe(self) -> str:
         if not self.configured:
@@ -171,6 +248,10 @@ class GuideRules:
             parts.append("refusés: " + ", ".join(self.refused))
         if self.exclusions:
             parts.append("exclusions: " + ", ".join(self.exclusions))
+        if self.zones:
+            parts.append("zone: " + ", ".join(self.zones) + (" + remote" if self.remote else ""))
+        elif self.remote:
+            parts.append("remote accepté")
         return "filtre guide (" + self.source + ") : " + (" ; ".join(parts) or "aucun")
 
 
@@ -184,8 +265,10 @@ def load_guide(explicit: str | None = None) -> GuideRules:
         return GuideRules()
     contrat_line = _header_line(text, "Contrat")
     excl_line = _header_line(text, "Exclusions")
+    zone_line = _header_line(text, "Zone")
     accepted, refused = parse_contrat(contrat_line)
     exclusions = parse_exclusions(excl_line)
+    zones, remote = parse_zone(zone_line)
     rules = GuideRules(
         source=str(path),
         configured=bool(accepted or refused or exclusions),
@@ -193,6 +276,8 @@ def load_guide(explicit: str | None = None) -> GuideRules:
         refused=refused,
         exclusions=exclusions,
         keywords=parse_keywords(text),
+        zones=zones,
+        remote=remote,
     )
     return rules
 
